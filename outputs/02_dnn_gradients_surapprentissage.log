@@ -1,0 +1,45 @@
+numpy 2.5.4
+Architecture [60, 64, 32, 1] : 6017 paramètres
+Architecture [784,256,128,10] : 235146 paramètres
+large  [40, 1024, 1] : 43009 params
+étroit [40, 32, 32, 32, 32, 32, 1] : 5569 params  <- ~8x moins
+Mémoire activations float64 batch 1024 : large 8.00 Mo, étroit 1.25 Mo
+compte réel des paramètres du modèle [40,64,32,1] : 4737
+Exercice P1 vérifié : 6017 / 235146 / 4737 paramètres ; large 8.00 Mo vs étroit 1.25 Mo.
+||∇W_ℓ|| (couche d'entrée -> couche de sortie), 8 couches cachées :
+ sigmoïde : [0.    0.    0.    0.    0.    0.    0.    0.001]
+ tanh     : [0.088 0.143 0.134 0.144 0.163 0.147 0.152 0.234]
+ relu+He  : [0.117 0.195 0.175 0.202 0.211 0.306 0.38  0.341]
+rapport ||∇W₁||/||∇W₈|| : sigmoïde 1.89e-03   relu+He 3.44e-01
+-> la 1re couche sigmoïde reçoit ~182x moins de signal que relu+He.
+Exercice P2 vérifié : ||∇W₁|| sigmoïde = 2.7e-06, ratio 1.9e-03 vs relu 0.34.
+normes par couche : [233.34816340934563, 306.5923713999195, 245.09915012249303]
+norme globale du gradient : 456.6441075475618
+exemple : ||g|| = 17.464 -> clippé à 1.000 (seuil c = 1.0)
+big init, lr=1.0 : sans clip exactitude 0.594  |  AVEC clip=1.0 exactitude 1.000
+Exercice P3 vérifié : norme brute 457 -> bornée à 1.0 ; acc sans clip 0.59, avec clip 1.00.
+std(activation cachée)      zéro : 1re=   0.000  dernière=     0.000
+std(activation cachée) naive σ=1 : 1re=   6.354  dernière=555341.779
+std(activation cachée)    xavier : 1re=   1.005  dernière=     0.099
+std(activation cachée)        He : 1re=   1.421  dernière=     1.589
+écart max entre neurones d'une couche initialisée à zéro : 0.0
+XOR : init zéro exactitude 0.50 (symétrie)  |  init He 1.00
+||∇W₁|| : naive 88.5  vs He 0.567
+Exercice P4 vérifié : He stable (std 1.59), naive explose (6e+05), zéro symétrique.
+étroit (h=2)  : train 0.255  val 0.390
+large  (h=64) : train 0.143  val 0.448 (min 0.272 à l'époque 11)
+-> la val du réseau large est 1.65x sa meilleure valeur : OVERFITTING
+Exercice P5 vérifié : train large 0.143, val ×1.65 après l'époque 11.
+taux de base (classer tout 'bénin') : 0.938
+sans pondération : exactitude 0.958 mais rappel attaques 0.516  <- paradoxe
+avec pondération : rappel 0.645, AUC 0.940  <- utile
+labels propres : exactitude test 0.907  |  40 % de labels retournés : 0.792
+drift : exactitude source 0.990 -> dérive 0.753  |  réentraîné sur le drift 0.990
+Exercice P6 vérifié : rappel 0.52->0.65 (pondéré), bruit -0.11, drift -0.24.
+peu profond [10,64,1]   : exactitude test 0.885
+profond [10,24×5,1]     : exactitude test 0.865
+normes de gradient du profond (entrée -> sortie) : [0.052 0.102 0.082 0.044 0.019 0.012]
+-> ||∇W₁||/||∇W₅|| = 2.82 : avec He+ReLU, pas d'effondrement (cf. P2 sigmoïde).
+Exercice P7 vérifié : profond 0.865 ≈ peu profond 0.885, gradients sains (ratio 2.82).
+NB 02 — tous les exercices sont vérifiés. ✅
+02_dnn_gradients_surapprentissage — exercices vérifiés. ✅

@@ -1,0 +1,112 @@
+
+========================================================================
+T03 · Régularisation, normalisation, optimisation — DL/RL appliqués à la cybersécurité
+========================================================================
+
+========================================================================
+📌 Bloc 0 — Environnement & imports
+========================================================================
+numpy 2.5.4
+
+========================================================================
+1 · Régularisation L1 / L2
+========================================================================
+Poids sans regularisation : [ 0.236 -0.234  0.246 -0.188 -0.099 -0.011  0.005  0.003 -0.032 -0.049  0.053  0.001]
+||w(lambda=0)||2 = 0.4715
+lambda= 0.01 : ||w||2 = 0.4665   ratio = 0.9894
+lambda=  0.1 : ||w||2 = 0.4260   ratio = 0.9035
+lambda=  1.0 : ||w||2 = 0.2317   ratio = 0.4914
+lambda= 10.0 : ||w||2 = 0.0425   ratio = 0.0902
+w_OLS          : [ 3.   -2.    1.    0.5  -0.25]
+w_ridge(lam=2) : [ 1.    -0.667  0.333  0.167 -0.083]  attendu w0/(1+lam) = [ 1.    -0.667  0.333  0.167 -0.083]
+soft-threshold(4, 3) = 1.0  (attendu 1.0)
+soft-threshold(2, 3) = 0.0  (attendu 0.0 -> sparsite)
+
+========================================================================
+Exercice corrigé
+========================================================================
+Exercice P1 : OK — shrinkage L2 exactement w0/(1+lam), L1 met les petits poids a zero.
+
+========================================================================
+2 · Dropout (inverted dropout, entraînement vs inférence)
+========================================================================
+mode entrainement : moyenne = 1.0031 (attendu ~1.0),  fraction de zeros = 0.4984 (attendu ~0.5)
+valeurs conservees : [2.]  (attendu 1/(1-p) = 2.0)
+mode evaluation    : identite ? True
+
+========================================================================
+Exercice corrigé
+========================================================================
+Exercice P2 : OK — train E[a]=a, keep=x/(1-p) exactement, eval = identite.
+
+========================================================================
+3 · Early stopping & validation
+========================================================================
+epochs=300, meilleur epoch = 24,  L_val min = 0.5403,  L_val fin = 0.8363
+L_train debut = 0.8200 -> fin = 0.0275
+
+========================================================================
+Exercice corrigé
+========================================================================
+Exercice P3 : OK — memorisation train, validation qui remonte, early stopping = argmin.
+
+========================================================================
+4 · Normalisation : BatchNorm & LayerNorm *(réf. Géron ch. 11)*
+========================================================================
+BatchNorm : moyennes par feature (attendu ~0) : [-0.  0. -0. -0. -0.] ...
+BatchNorm : variances par feature (attendu ~1) : [1. 1. 1. 1. 1.] ...
+LayerNorm : moyennes par echantillon ~0 ? True
+LayerNorm : variances par echantillon ~1 ? True
+BN == StandardScaler ? True
+
+========================================================================
+Exercice corrigé
+========================================================================
+Exercice P4 : OK — BN centre par feature, LN centre par echantillon, (gamma,beta) verifies.
+
+========================================================================
+5 · Optimiseurs : SGD, momentum, RMSProp, Adam *(réf. Géron ch. 11)*
+========================================================================
+      SGD : w1 = 1.800000, perte apres 50 pas = 5.312e-05
+ Momentum : w1 = 1.800000, perte apres 50 pas = 8.893e-03
+  RMSProp : w1 = 1.683772, perte apres 50 pas = 6.886e-18
+     Adam : w1 = 1.900000, perte apres 50 pas = 2.870e-03
+
+========================================================================
+Exercice corrigé
+========================================================================
+Exercice P5 : OK — 4 premiers pas exacts, Adam sous 1e-2 de perte en 100 pas.
+
+========================================================================
+6 · Choix des hyperparamètres (grille mini)
+========================================================================
+lr=0.01  lambda=0.0   -> acc test = 0.9250
+lr=0.01  lambda=0.01  -> acc test = 0.9250
+lr=0.01  lambda=0.1   -> acc test = 0.9313
+lr=0.05  lambda=0.0   -> acc test = 0.9250
+lr=0.05  lambda=0.01  -> acc test = 0.9313
+lr=0.05  lambda=0.1   -> acc test = 0.9313
+lr=0.1   lambda=0.0   -> acc test = 0.9313
+lr=0.1   lambda=0.01  -> acc test = 0.9313
+lr=0.1   lambda=0.1   -> acc test = 0.9375
+Meilleure config : (0.1, 0.1, 0.9375)
+
+========================================================================
+Exercice corrigé
+========================================================================
+Exercice P6 : OK — 9 configs evaluees, gagnant >= 0.85 d'exactitude.
+
+========================================================================
+7 · Synthèse globale — l'essentiel & exemple intégrateur
+========================================================================
+      plain : epochs= 300, best_epoch=  24,  ||W2||=1.610,  val_acc=0.733
+         L2 : epochs= 300, best_epoch=  29,  ||W2||=1.269,  val_acc=0.725
+    dropout : epochs= 300, best_epoch=  29,  ||W2||=1.334,  val_acc=0.743
+ early-stop : epochs=  45, best_epoch=  24,  ||W2||=1.610,  val_acc=0.733
+
+========================================================================
+Exercice corrigé
+========================================================================
+Exercice P7 : OK — 4 configs, L2 shrink les poids, early stop < 100 epoques.
+NB 03 — tous les exercices sont vérifiés. ✅
+03_regularisation_normalisation_optimisation — exercices vérifiés. ✅

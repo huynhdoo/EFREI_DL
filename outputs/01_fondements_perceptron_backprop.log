@@ -1,0 +1,35 @@
+numpy 2.5.4
+AND : convergé à l'époque 6  poids = [2. 1.] b = -3.0
+XOR : convergé ? None  meilleure exactitude par époque = 0.5
+-> le perceptron ne JAMAIS séparé XOR : il faut une couche cachée (voir P5).
+AND : converged_at = 6, exactitude = 1.0
+XOR : converged_at = None, meilleure exactitude = 0.5
+Exercice P1 vérifié : AND séparable, XOR non séparable par perceptron.
+σ(0) = 0.5  σ'(0) = 0.25
+tanh(0) = 0.0  tanh'(0) = 1.0
+σ(10) = 0.9999546021312976  σ'(10) = 4.5395807735907655e-05  <- saturation !
+erreur max dérivée analytique vs numérique : sigmoïde 3.9963359010908306e-11  tanh 1.725231069116262e-11
+softmax([1,2,3]) = [0.09  0.245 0.665]  somme = 0.9999999999999999
+Exercice P2 vérifié : σ'(0)=0.25, tanh'(0)=1, softmax normalisée, saturation confirmée.
+BCE à la main   = 0.6730116670092564
+BCE sklearn     = 0.6730116670092564
+MSE (comparaison)= 0.24200000000000005
+écart max gradient analytique vs numérique : 7.586994921204848e-11
+Exercice P3 vérifié : BCE = 0.6730116670092564 = sklearn ; gradient exact.
+x² avec η=0.1 -> |x₆₀| = 1.5324955408658897e-06 (converge vers 0)
+x² avec η=1.1 -> |x₆₀| = 56347.51435316725 (DIVERGE : |1−2η| = 1.2)
+full-batch η=0.1 : perte 0.693 -> 0.220, exactitude 0.960
+mini-batch 32   : perte 0.693 -> 0.144
+η=0.001 (100 ép): perte 0.681  <- trop petit pas, à peine bougé
+Exercice P4 vérifié : η=0.1 -> perte 0.220, exactitude 0.96 ; η=0.001 -> 0.681.
+gradient check : max erreur relative = 1.80e-09  (attendu ~1e-9) -> OK
+MLP 2-8-1 sur XOR : perte 0.696 -> 0.0046, exactitude = 1.0
+Exercice P5 vérifié : backprop juste (err 1.8e-09), XOR 100 %, perte 0.0046.
+Détecteur de scan : exactitude 1.000, précision 1.000, rappel 1.000, AUC 1.0000
+Interprétation : le rappel est la métrique de sécurité (un scan manqué = reconnaissance réussie).
+re-sondage : exactitude 1.0, rappel 1.0, précision 1.0
+Exercice P6 vérifié : détecteur de scan fiable (rappel = 1 sur le test).
+Détecteur d'intrusion (MLP 8-32-16-1) : exactitude test 0.948, AUC 0.9826, perte 0.192
+Exercice P7 vérifié : intégrateur cyber exactitude 0.948, AUC 0.983.
+NB 01 — tous les exercices sont vérifiés. ✅
+01_fondements_perceptron_backprop — exercices vérifiés. ✅

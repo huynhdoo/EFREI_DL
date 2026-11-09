@@ -54,4 +54,17 @@ notebooks sont dans `code/_build_nb_*.py`. Les logs d'exécution sont dans `outp
 
 ## Statut de vérification
 
-*(rempli après exécution complète — les compteurs sont dérivés des artefacts, pas mémorisés)*
+- 11/11 notebooks exécutés intégralement (`nbclient`, Python 3.12.3, numpy 2.5.4,
+  scipy 1.18.1, pandas 3.1.0, sklearn 1.9.1, matplotlib 3.11.2) — **ALL PASS**,
+  sorties pré-calculées dans les `.ipynb`, `nbformat.validate` OK.
+- T01–T09 : 7 exercices corrigés chacun (P1–P7) — 63 exercices, chaque valeur
+  numérique sondée indépendamment (numpy/scipy) avant d'être assertée ;
+  **450 asserts** au total dans les notebooks (dont 364 sur T01–T09).
+- Notebook 10 : 15 drills « papier » vérifiés (69 asserts) ; notebook 11 :
+  8 figures pédagogiques inline + PNG dans `outputs/`.
+- Scripts miroirs `code/0X_*.py` : 11/11 auto-exécutés sans erreur, marqueur
+  `✅` présent, logs dans `outputs/0X_*.log`.
+- `exams/` : 4 devoirs (15 questions, A 7 pt / B 7 pt / C 6 pt = 20) + 4 corrigés ;
+  parité exacte énoncés↔corrigés et toutes les valeurs recalculées numpy/scipy.
+- Colab-ready : métadonnées `colab` posées sur les 11 notebooks ; la seule ligne
+  d'installation est le `!pip install` du Bloc 0 (paquets déjà présents sur Colab).

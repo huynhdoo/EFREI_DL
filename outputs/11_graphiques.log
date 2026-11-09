@@ -1,0 +1,25 @@
+Matplotlib pret.
+Figure 1 : prob. reseau = [0.022 0.956 0.964 0.046], exactitude = 100%
+Figure 2 : ||dL/dW|| par couche (1 -> 10) = [  0.026   0.311   0.848   2.615   5.675  10.535  19.825  49.518  80.485 163.949]
+  ratio couche1/couche10 = 1.56e-04
+Figure 3 : lr=0.001 -> perte finale = 8.26e+00
+Figure 3 : lr=0.01 -> perte finale = 7.89e-04
+Figure 3 : lr=0.3 -> perte finale = 1.40e-59
+Figure 4 : meilleur degre en validation = 7
+  MSE train : 0.148 -> 0.005 (ne fait que baisser)
+  MSE val   : 0.416 -> 0.090 (deg 7) -> 0.9 (explosion)
+Figure 5 : filtre identite        max|reponse| = 1.13
+Figure 5 : filtre aretes horiz.   max|reponse| = 3.11
+Figure 5 : filtre aretes vert.    max|reponse| = 3.31
+Figure 5 : filtre diagonale       max|reponse| = 6.23
+Figure 6 : f moyen avant le changement de regime = 0.499
+  f moyen apres (exfiltration) = 0.790
+Figure 7 : erreur moyenne benignes = 0.005, attaques = 2.662
+  AUC = 0.9988
+Figure 8 : eps = 0.05      premiere MA = 0.86, derniere MA = 0.83, politique gloutonne = [0 0 0 0]
+Figure 8 : eps = 0.9       premiere MA = 0.24, derniere MA = 0.37, politique gloutonne = [0 0 0 0]
+Figure 8 : eps décroissant premiere MA = 0.36, derniere MA = 0.81, politique gloutonne = [0 0 0 0]
+  episode de convergence (MA >= 0.9 * meilleur) : 85
+NB 11 — les 8 figures sont générées. ✅
+8 PNG verifies dans /home/huynhdoo/drive/SPARK-d495/EFREI/DL/outputs
+11_graphiques — figures générées. ✅

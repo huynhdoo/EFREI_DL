@@ -43,9 +43,9 @@ Voir le détail dans [`PLAN_NOTEBOOKS.md`](PLAN_NOTEBOOKS.md).
 - `slides/EFREI - DL.pptx` — support de séance : déroulé des 10 séances,
   programme indicatif par topic (T01–T09 + préparation) et rubrique du projet
   évalué (miroir de `EFREI/MATHS/slides/EFREI - MATHS.pptx`).
-- `courses/T0N_synthese_*.docx` — fiches de synthèse P1–P6 de chaque topic
+- `courses/T0N_synthese_*.docx` (T01–T04) — fiches de synthèse P1–P6 de chaque topic
   (à quoi ça sert / calcul manuel / code Python).
-- `courses/T0N_projet_*.docx` — cas d'étude cyber complet, calculs détaillés étape par étape.
+- `courses/T0N_projet_*.docx` (T01–T04) — cas d'étude cyber complet, calculs détaillés étape par étape.
 - `exams/devoir_{1..4}.md` + `exams/corrige_devoir_{1..4}.md` — 4 devoirs blancs
   d'auto-évaluation (2 h · 20 pts) avec corrigés vérifiés numériquement.
 

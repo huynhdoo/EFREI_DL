@@ -1,0 +1,67 @@
+numpy 2.5.4
+Boite a outils prete : MLP numpy ( 8 entrees, 1 couche cachee de 16, sortie sigmoid ).
+Exactitude de base (test propre) = 0.9889
+  bruit sigma = 0.00  ->  exactitude = 0.9889
+  bruit sigma = 0.05  ->  exactitude = 0.9861
+  bruit sigma = 0.10  ->  exactitude = 0.9944
+  bruit sigma = 0.15  ->  exactitude = 0.9694
+  bruit sigma = 0.20  ->  exactitude = 0.9528
+  bruit sigma = 0.30  ->  exactitude = 0.8861
+Exactitudes par graine : [0.989 0.986 0.992 0.992 0.989 0.992 0.992 0.992]
+Moyenne = 0.9903   ecart-type inter-graines = 0.0020
+-> un audit n'annonce JAMAIS la moyenne sans l'ecart-type.
+P1 verifie : ||w||1 = 3.5, deplacement max du logit = 1.75 < marge 2.0 (sur).
+P1 verifie : std inter-graines [0.88, 0.92] = 0.02.
+Exactitude globale = 0.9889   (le classifieur 'toujours legitime' fait deja 0.9528 !)
+Rappel phishing (minoritaire) = 0.8235   Rappel legitime = 0.9971
+-> gap de rappel = 0.1736 : la classe qui compte est sous-detectee.
+  semaine 0  (glissement 0.00)  ->  exactitude = 0.9889
+  semaine 1  (glissement 0.06)  ->  exactitude = 0.9750
+  semaine 2  (glissement 0.12)  ->  exactitude = 0.9500
+  semaine 3  (glissement 0.18)  ->  exactitude = 0.8972
+  semaine 4  (glissement 0.24)  ->  exactitude = 0.8361
+Re-entrainement sur les donnees de la semaine 4 -> exactitude = 0.9778
+-> la derive est corrigee par re-entrainement recent (procedures MLOps).
+P2 verifie : rappel phishing = 0.90, rappel legitime = 0.99444, exactitude = 0.985 (trompeuse), gap = 0.09444
+     0% d'etiquettes renversees  ->  exactitude = 0.9778   rappel phishing = 0.9791
+    10% d'etiquettes renversees  ->  exactitude = 0.9389   rappel phishing = 0.8953
+    20% d'etiquettes renversees  ->  exactitude = 0.9028   rappel phishing = 0.8168
+    30% d'etiquettes renversees  ->  exactitude = 0.8556   rappel phishing = 0.7277
+-> 30% d'etiquettes ciblees suffisent a rendre le detecteur aveugle sur le phishing.
+P3 verifie : seuil propre 0.0 -> seuil empoisonne 0.375 ; x=0.2 (vrai phishing) desormais classifie 'legitime' avec 10% d'etiquettes renversees.
+  eps = 0.00  ->  exactitude sous FGSM = 0.9889
+  eps = 0.05  ->  exactitude sous FGSM = 0.9444
+  eps = 0.10  ->  exactitude sous FGSM = 0.8083
+  eps = 0.15  ->  exactitude sous FGSM = 0.6361
+  eps = 0.20  ->  exactitude sous FGSM = 0.3389
+  eps = 0.30  ->  exactitude sous FGSM = 0.0222
+-> un eps de 0.30 sur des scores normalises [0,1] detruit completement le detecteur.
+Echantillon 0: p(x) = 0.9996 -> p(x_adv) = 0.9774 (eps = 0.1, L-inf borne verifiee)
+P4 verifie : p = 0.6225 -> p_adv = 0.4073 ; x_adv = [0.75 0.75 0.75] ; ||x_adv - x||_inf = 0.25 (certifie).
+Sous FGSM eps=0.15 : exactitude = 0.6194
+  apres clipping [0,1] des entrees : exactitude = 0.6361   (10.6% des exemples attaquaient hors plage)
+-> le clipping est un garde-fou d'integrite des donnees, pas une defense complete.
+Standard :  propre 0.9806   sous PGD-30 eps=0.10 : 0.7444
+Adversarial : propre 0.9833   sous PGD-30 eps=0.10 : 0.8083
+-> recuperation partielle du re-entrainement adversarial : +0.0639 pts.
+Detecteur 'desaccord d'ensemble' : AUC = 0.8034
+Detecteur 'marge de confiance'    : AUC = 0.5301  (FGSM overshoot la frontiere -> exemples attaques tres confiants)
+P5 verifie : clip([1.4, -0.3, 0.5, 1.0001]) = [1, 0, 0.5, 1] ; 2/4 exemples marques par le detecteur de marge (seuil 0.1).
+Bande de confiance [0.35, 0.65] -> part routee vers l'analyste :
+  trafic propre   : 1.11%
+  sous FGSM 0.10  : 6.67%
+-> le HITL absorbe les decisions basculees par l'attaque ; alerte si > 10%.
+P6 verifie : 4/8 = 50% routages analyste -> regle d'alerte (>10%) declenchee.
+SCORECARD ROBUSTESSE — detecteur phishing (MLP numpy, meme test set)
+Axe de robustesse                   mesure  ref/contre-epreuve
+----------------------------------------------------------------
+P1 bruit (sigma=0.30)               0.8861              0.9889
+P1 stabilite (std graines)          0.9903              0.0020
+P2 biais (rappel phish)             0.8235              0.9971
+P2 derive (semaine 4)               0.8361              0.9778
+P3 empoisonnement (30%)             0.8556              0.7277
+P4 FGSM (eps=0.15)                  0.6361              0.9889
+-> scorecard complete : chaque ligne est reproductible et auditable.
+P7 verifie : note = 0.36 + 0.18 + 0.24 = 0.78 < seuil 0.8 -> deploiement bloque, revue humaine (HITL).
+NB 09 — tous les exercices sont vérifiés. ✅
+09_robustesse_adversarial_gouvernance — exercices vérifiés. ✅

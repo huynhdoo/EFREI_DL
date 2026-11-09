@@ -1,0 +1,39 @@
+numpy 2.5.4
+AE 8→5→2→5→8 sur 400 flux bénins standardisés
+MSE reconstruction : init = 1.0000 → entraîné = 0.22644
+goulot z : (400, 2) — variance portées ~ 2 facteurs sur 8 dimensions
+x = [ 2. -1.  5.] → z = [ 2. -1.] → x̂ = [ 2. -1.  0.] (le goulot tue la 3e coord)
+erreur goulot k=2 : 25.0 ; goulot k=1 : 26.0
+Exercice P1 vérifié ✔
+MSE AE linéaire = 0.22907  vs  PCA(k=2) = 0.22907
+captura des composantes PCA par le sous-espace AE : [np.float64(1.0000000000000002), np.float64(0.9999999999999999)]
+valeurs propres PCA : [4.585 1.598]
+capture de u1 = 0.99999, u2 = 0.99999
+MSE AE = 0.00130 vs MSE PCA = 0.00130
+Exercice P2 vérifié ✔
+MSE(x̃, x) = 0.25531  (entrée corrompue, σ=0.5)
+MSE(x̂, x) = 0.14150  (reconstruction de l'AE débruiteur)
+gain de débruitage = ×1.8
+MSE(x̂, x) = 0.14150 < MSE(x̂, x̃) = 0.23214
+Exercice P3 vérifié ✔
+seuil = quantile 95 % des scores bénins = 0.78873
+taux d'alerte à vide (bénins test > seuil) = 0.030  (visé ≈ 0.05)
+AUC (bénins vs attaques) = 1.0000
+TPR au seuil 99 % = 1.000 ; AUC après transformation monotone = 1.0000
+Exercice P4 vérifié ✔
+k-NN cosinus sur le goulot (requêtes vs pool disjoint) : exactitude = 1.000
+cos manuel = 0.936705 ; voisin le plus proche d'un flux famille 1 : famille 1 (sim = 0.9993)
+Exercice P5 vérifié ✔
+AE entraîné sur 300 flux bénins seuls ; test : + 180 attaques
+seuil (quantile 95 % bénin) = 0.64184
+AUC = 1.0000 ; alertes : VRAIES attaques = 180/180, fausses = 15/300
+taux de détection par famille (ddos, portscan, exfil) : [1. 1. 1.]
+AE propre (bénin seul) : AUC = 1.0000
+AE contaminé (bénin+attaques) : AUC = 0.6921
+Exercice P6 vérifié ✔
+détection : 168 flux signalés / 350 ; AUC pipeline = 1.0000
+qualification k-NN des attaques signalées : exactitude famille = 1.000
+AUC (capture fraîche) = 1.0000 ; précision top-30 = 1.000 ; alerte à vide = 0.046
+Exercice P7 vérifié ✔
+NB 06 — tous les exercices sont vérifiés. ✅
+06_autoencodeurs_anomalies — exercices vérifiés. ✅

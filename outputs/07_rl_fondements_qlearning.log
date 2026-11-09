@@ -1,0 +1,38 @@
+Agent -> etat initial : (0, 0) | attacker : (3, 0)
+action bas    -> etat (1, 0) attacker (3, 0) recompense -1.0 fini=False
+action bas    -> etat (2, 0) attacker (3, 1) recompense -1.0 fini=False
+action bas    -> etat (3, 0) attacker (3, 1) recompense -1.0 fini=False
+action droite -> etat (3, 1) attacker (3, 2) recompense -1.0 fini=False
+action droite -> etat (3, 2) attacker (3, 2) recompense -1.0 fini=False
+action droite -> etat (3, 3) attacker (3, 2) recompense +10.0 fini=True
+Boucle agent/environnement OK : l'agent recoit etat + recompense, JAMAIS d'etiquette.
+Exercice P1 verifie : step() deterministe, recompenses -1 / -6 / +10 conformes au calcul a la main.
+Supervise : exactitude sur holdout = 0.930 (100 % d'etiquettes requises)
+RL equivalent : l'agent recoit -1/-10/+10 seulement -> aucune etiquette 'attaque/non attaque'.
+Boucle RL vue en P1 : un appel step() renvoie etat/recompense/fin = ['tuple', 'float', 'bool']
+Exercice P2 verifie : holdout 0.930, rappel attaques 0.794.
+-> le supervise apprend la regle GRACE aux etiquettes ; le RL de T07-P5, non.
+Bellman exact (systeme lineaire V = R + gamma P V) :
+  V_A = -2.173038   V_B = -2.977867   V_C = 0.0   V_D = -2.000000
+  Q(D,fixer) = -2.0000   Q(D,ignorer) = -2.4364   -> politique optimale en D : fixer
+  residu de Bellman |V - (R + gamma P V)| = 0.00e+00
+Exercice P3 verifie : V=(-2.173, -2.978, 0.0, -2.000), politique D = fixer.
+Apres 2000 tirages : regret cumule epsilon-greedy = 157, UCB = 95
+  parts de la meilleure regle : eps = 0.670, UCB = 0.844
+Exercice P4 verifie : UCB main = 1.7946 (bras 1), regret final UCB 95 < eps 157.
+V*(depart) par itération de valeur = 3.213428 (calcul main : 3.213428)
+Q-Learning : chemin optimal appris = 6 pas | erreur moy |V_Q - V_VI| = 0.1688
+V_Q(depart) = 3.2134 vs V_VI(depart) = 3.2134
+Retour moyen des 200 derniers episodes : 2.005
+Exercice P5 verifie : maj Q main = 2.6 (attendu 2.6), chemin = 6, |V_Q-V_VI| moy = 0.1688.
+SARSA      : Q = 1.0 + 0.1*(2 + 0.9*0.8 - 1.0) = 1.1720   (on suit la politique reels)
+Q-Learning : Q = 1.0 + 0.1*(2 + 0.9*1.5 - 1.0) = 1.2350   (on cible l'optimum -> off-policy)
+Exercice P6 verifie : SARSA 1.1720000000000002, Q-Learning 1.235.
+DQN (vue conceptuelle) : Q(s,a;theta) = reseau au lieu d'un tableau -> generalisation, replay, cible
+retardee ; pas d'entrainement ici (pas de torch), le tabulaire de P5 suffit pour la grille.
+Comparaison (100 episodes, attaquant mobile) :
+  agent Q-Learning : retour moyen +5.00, réussite 1.00
+  agent aléatoire  : retour moyen -16.20, réussite 0.00
+Exercice P7 verifie : 100% de réussite vs 0% (aléatoire).
+07_rl_fondements_qlearning — exercices vérifiés. ✅
+NB 07 — tous les exercices sont vérifiés. ✅

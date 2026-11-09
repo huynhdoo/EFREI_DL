@@ -1,0 +1,46 @@
+numpy 2.5.4
+conv(delta, kernel 1..9) : (5, 5) - valeur centrale = 4.0
+n=16 k=3 s=1 p=1 -> formule 16 | réel 16
+n=16 k=3 s=2 p=0 -> formule  7 | réel  7
+n=16 k=5 s=1 p=2 -> formule 16 | réel 16
+n=16 k=3 s=3 p=1 -> formule  6 | réel  6
+n= 8 k=3 s=2 p=1 -> formule  4 | réel  4
+n= 7 k=4 s=2 p=0 -> formule  2 | réel  2
+n=10 k=5 s=1 p=0 -> formule  6 | réel  6
+n=16 k=7 s=1 p=3 -> formule 16 | réel 16
+Exercice P1 vérifié : formule ⌊(n+2p−k)/s⌋+1 conforme à la boucle réelle.
+maxpool 2x2 de arange(16):
+ [[ 5.  7.]
+ [13. 15.]]
+backward : somme des gradients = 4.0 - pixels non nuls = 4
+décalage d'un pixel : L1 brut = 2.0, L1 après maxpool = 0.0
+Exercice P2 vérifié : maxpool exact, backward conservé, signature décalée indétectable.
+3 x Conv(3x3,s1)           -> RF, jump = (7, 1)
+Conv-Pool-Conv-Pool (notre) -> RF, jump = (10, 4)
+impulsion : pixels d'entrée influencés en sortie -> bbox [7 7] - nb de pixels = 49
+Exercice P3 vérifié : RF calculé (7, jump 1) == RF mesuré (bbox 7x7, 49 px).
+mini-CNN : [20, 1032, 18] total = 1070
+MLP 256-64-2 : [16448, 130] total = 16578
+le MLP dense paye 15.5x plus de paramètres qu'un CNN sur le même problème
+Exercice P4 vérifié : 1 070 paramètres CNN vs 16 578 MLP sur images 16x16.
+|réponse Sobel-x| max = 3.0 à la colonne 7
+Sobel-y (image à contour horizontal) : max = 3.0 à la ligne 7
+filtre tout-1 sur image pleine de 1 : réponse intérieure = 9.0
+Exercice P5 vérifié : pics de cartographie aux vrais contours (col 7 / ligne 7).
+im2col vs boucle (s=1, p=0) : max |écart| = 1.78e-15
+im2col vs boucle (s=1, p=1) : max |écart| = 1.78e-15
+im2col vs boucle (s=2, p=0) : max |écart| = 8.88e-16
+im2col vs boucle (s=2, p=1) : max |écart| = 5.33e-15
+train : (320, 1, 16, 16) taux de malware = 0.5 | test : (160, 1, 16, 16) taux de malware = 0.5
+gradient check : écart relatif max analytic vs numérique = 5.67e-06
+mini-CNN : exactitude train 1.000 | test 1.000 | perte 0.0002
+Exercice P6 vérifié : backward exact, CNN à 1 070 paramètres, test 1.000.
+mini-CNN (1 070 param.)   : exactitude test 0.995
+MLP sklearn 256-64-2 (16 578 param.) : exactitude test 0.650
+matrice de confusion CNN (lignes = vrai, colonnes = prédit) :
+            prédit bénin | prédit malware
+  vrai bénin       99    |        1
+  vrai malware      0    |      100
+Exercice P7 vérifié : CNN 0.995 vs MLP 0.650 — invariance translationnelle gagne.
+NB 04 — tous les exercices sont vérifiés. ✅
+04_cnn_cyber — exercices vérifiés. ✅

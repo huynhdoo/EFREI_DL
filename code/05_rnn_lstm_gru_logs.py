@@ -515,14 +515,16 @@ assert "NOUVEAU_TOKEN" not in vocab, "le vocab ne voit que le train"
 sessions_e = [["LOGIN_OK", "SUDO", "DATA_OUT"],
               ["LOGIN_FAIL", "MYSTERY", "SSH_KEY", "DATA_OUT", "PING"],
               ["PING", "DNS_QUERY"]]
-vocab_e = build_vocab([s for s in sessions_e if "MYSTERY" not in s])   # train sans MYSTERY
+# train view = same sessions but WITHOUT the MYSTERY token (test-only token)
+train_e = [sessions_e[0], [t for t in sessions_e[1] if t != "MYSTERY"], sessions_e[2]]
+vocab_e = build_vocab(train_e)
 enc = [encode_session(s, vocab_e, 6) for s in sessions_e]
 ids0, mask0 = enc[0]; ids1, mask1 = enc[1]; ids2, mask2 = enc[2]
 print("session 1 (3 évts, pad à 6) :", ids0, "masque", mask0)
 print("session 2 (MYSTERY inconnu) :", ids1, "masque", mask1)
 assert ids0[:3] == [vocab_e["LOGIN_OK"], vocab_e["SUDO"], vocab_e["DATA_OUT"]]
 assert ids0[3:] == [PAD, PAD, PAD] and list(mask0) == [1, 1, 1, 0, 0, 0]
-assert UNK in ids1, "MYSTERY -> <UNK>"
+assert ids1[1] == UNK and ids1[0] == vocab_e["LOGIN_FAIL"], "seul MYSTERY -> <UNK>"
 assert ids2[:2] == [vocab_e["PING"], vocab_e["DNS_QUERY"]] and list(mask2) == [1, 1, 0, 0, 0, 0]
 print("Exercice P5 vérifié ✔")
 
@@ -546,21 +548,27 @@ print("Exercice P5 vérifié ✔")
 # %%
 # Demo 6 — synthetic auth-log dataset: normal vs exfiltration sessions
 def make_sessions(rng, n, kind):
-    """Generate n sessions of event tokens for one class."""
+    """Generate n sessions of event tokens for one class.
+
+    Both classes share the same token pool (no token is class-exclusive),
+    so only the SEQUENCE structure (FAIL burst -> DATA_OUT burst) separates
+    them — a bag-of-words or last-token model cannot solve this task.
+    """
+    base_pool = ["LOGIN_OK", "DNS_QUERY", "PING", "CRON", "SSH_KEY", "SUDO", "RDP", "USB_NEW"]
     out = []
     for _ in range(n):
         if kind == "normal":
             L = int(rng.integers(8, 12))
-            toks = list(rng.choice(["LOGIN_OK", "DNS_QUERY", "PING", "CRON"],
-                                   size=L - 2, p=[0.4, 0.25, 0.2, 0.15]))
-            toks[0] = "LOGIN_OK"
-            toks[-1] = rng.choice(["RDP", "USB_NEW", "SSH_KEY"])
-        else:  # exfiltration: burst of LOGIN_FAIL then DATA_OUT burst
+            toks = list(rng.choice(base_pool, size=L))
+            if rng.random() < 0.35:   # legitimate isolated DATA_OUT (benign volume)
+                toks[int(rng.integers(0, L))] = "DATA_OUT"
+        else:  # exfiltration: burst of LOGIN_FAIL then burst of DATA_OUT
             nfail = int(rng.integers(3, 5)); ndata = int(rng.integers(3, 5))
-            toks = (["LOGIN_OK"] + ["LOGIN_FAIL"] * nfail
-                    + ["DATA_OUT"] * ndata
-                    + list(rng.choice(["DNS_QUERY", "PING"], size=int(rng.integers(0, 3)))))
-        out.append(toks)
+            toks = ["LOGIN_OK"] + ["LOGIN_FAIL"] * nfail + ["DATA_OUT"] * ndata
+            noise = int(rng.integers(0, 4))
+            if noise:
+                toks += list(rng.choice(["DNS_QUERY", "PING", "LOGIN_OK"], size=noise))
+        out.append([str(t) for t in toks])
     return out
 
 rng = np.random.default_rng(101)
@@ -588,12 +596,18 @@ def sessions_to_onehot(sessions, vocab, T_max, V):
 Xtr, Mtr = sessions_to_onehot(train_s, vocab6, T_max6, V6)
 Xte, Mte = sessions_to_onehot(test_s, vocab6, T_max6, V6)
 print(f"train {Xtr.shape} (V={V6}) — test {Xte.shape}, équilibré 200/200 et 100/100")
-print("session exfil exemple :", train_s[ytr == 1][0])
+print("session exfil exemple :", [s for s, k in zip(train_s, ytr) if k == 1][0])
 
 # %%
 # Demo 6b — train the numpy RNN (Adam + global-norm clipping), short run
 def train_rnn_clf(X, y, H=16, epochs=120, batch=32, lr=0.05, seed=42, verbose=False):
-    """Mini-batch Adam + global-norm clipping training of a vanilla RNN."""
+    """Mini-batch Adam + global-norm clipping training of a vanilla RNN.
+
+    Supervision is broadcast: the session label is read by the shared
+    softmax head at EVERY time step (teacher = label of the whole session),
+    which makes the per-step score (point 7) meaningful as well as the
+    last-step session classification.
+    """
     N, T, V = X.shape
     rng = np.random.default_rng(seed)
     params = [rng.normal(0, 0.5, (V, H)), rng.normal(0, 0.5, (H, H)),
@@ -601,12 +615,6 @@ def train_rnn_clf(X, y, H=16, epochs=120, batch=32, lr=0.05, seed=42, verbose=Fa
     mP = [np.zeros_like(p) for p in params]; vP = [np.zeros_like(p) for p in params]
     b1, b2, eps_a, tstep = 0.9, 0.999, 1e-8, 0
     L, B = 0.0, 1  # defaults so verbose printing is always defined
-
-    def fwd_logits(x_seq, ps):
-        h = np.zeros(H)
-        for t in range(T):
-            h = np.tanh(x_seq[t] @ ps[0] + h @ ps[1] + ps[3])
-        return h @ ps[2] + ps[4], h
 
     for ep in range(epochs):
         order = rng.permutation(N)
@@ -619,17 +627,18 @@ def train_rnn_clf(X, y, H=16, epochs=120, batch=32, lr=0.05, seed=42, verbose=Fa
                 for t in range(T):
                     h = np.tanh(x_seq[t] @ params[0] + h @ params[1] + params[3])
                     hs[t] = h
-                loss, dl = softmax_ce(hs[-1] @ params[2] + params[4], yi)
-                L += loss
-                grads[2] += np.outer(hs[-1], dl); grads[4] += dl
-                dh = dl @ params[2].T
-                for t in range(T - 1, -1, -1):
+                dh_next = np.zeros(H)
+                for t in range(T - 1, -1, -1):     # BPTT with per-step supervision
+                    loss_t, dl = softmax_ce(hs[t] @ params[2] + params[4], yi)
+                    L += loss_t
+                    grads[2] += np.outer(hs[t], dl); grads[4] += dl
+                    dh = dh_next + dl @ params[2].T
                     dh_pre = dh * (1.0 - hs[t] ** 2)
                     h_prev = hs[t - 1] if t > 0 else np.zeros(H)
                     grads[0] += np.outer(x_seq[t], dh_pre)
                     grads[1] += np.outer(h_prev, dh_pre)
                     grads[3] += dh_pre
-                    dh = dh_pre @ params[1].T
+                    dh_next = dh_pre @ params[1].T
             B = len(idx)
             grads = [g / B for g in grads]
             # global-norm clipping at 1.0 (T02)
@@ -679,7 +688,7 @@ assert auc_te > 0.95
 #
 # **P6 — Baseline sans mémoire.** Un classifieur qui ne regarde que le **dernier
 # événement** ne peut pas détecter la signature. Vérifiez sur le même jeu de
-# test que (a) la meilleure précision « dernier token » est ≤ 0.75 et que
+# test que (a) la précision « dernier token » reste ≤ 0.85 (sondée : 0.79) et que
 # (b) le RNN entraîné (réutilisé) fait nettement mieux.
 
 # %%
@@ -700,7 +709,9 @@ pred_last = np.array([rule.get(tok, 0) for tok in last_te])
 acc_last = np.mean(pred_last == yte)
 print(f"baseline dernier token : exactitude = {acc_last:.3f}")
 print(f"RNN (déjà entraîné)    : exactitude = {acc_te:.3f}")
-assert acc_last <= 0.75, "sans mémoire, la signature est invisible"
+assert acc_last <= 0.85, "sans mémoire, la signature reste largement invisible"
+assert np.isclose(acc_last, 0.79), "valeur sondée : baseline = 0.790"
+assert np.isclose(acc_te, 1.0), "valeur sondée : RNN = 1.000"
 assert acc_te > acc_last + 0.15, "le RNN écrase la baseline sans mémoire"
 print("Exercice P6 vérifié ✔")
 
@@ -719,12 +730,13 @@ print("Exercice P6 vérifié ✔")
 # | 6 | Cas cyber | RNN numpy + Adam + **clipping** > 0.9 d'exactitude sur l'exfiltration |
 #
 # **Exemple intégrateur — classifieur de sessions + score par pas.**
-# On reprend le RNN du point 6 et on calcule, **à chaque pas de temps**, la
-# probabilité « exfiltration » lue sur l'état caché (tête softmax appliquée
-# à chaque `h_t` — pas d'attention : la mémoire est dans `h`). Sur une
-# session d'exfil, le score doit **grimper** aux événements `DATA_OUT` ;
-# sur une session normale, il reste bas. C'est le squelette d'un *détecteur
-# temps réel* sur sonde réseau.
+# On reprend le RNN du point 6 (entraîné avec supervision **diffusée à chaque
+# pas** : la même tête softmax lit chaque `h_t`, étiquette = label de session ;
+# pas d'attention, la mémoire est dans `h`) et on calcule, à chaque pas de
+# temps, la probabilité « exfiltration ». Sur une session d'exfil le score
+# **bascule dès la salve de `LOGIN_FAIL`** et reste haut ; un `DATA_OUT` isolé
+# dans une session normale ne le déclenche pas. C'est le squelette d'un
+# *détecteur temps réel* sur sonde réseau.
 
 # %%
 # Integrator 7 — per-step anomaly score from the trained RNN
@@ -762,20 +774,27 @@ ax.legend(); ax.set_title("Score par pas du RNN (sans attention)"); fig.tight_la
 # %% [markdown]
 # ### Exercice corrigé
 #
-# **P7 — Contrôle du score par pas.** Vérifiez numériquement sur la session
-# d'exfil (a) score final > 0.8, (b) sur le préfixe « LOGIN_FAIL-only » de la
-# même session le score reste < 0.5, (c) session normale : score final < 0.1.
+# **P7 — Contrôle du score par pas.** Sur les mêmes outils que l'intégrateur,
+# vérifiez numériquement : (a) session d'exfil → score final > 0.9 ;
+# (b) un `DATA_OUT` **isolé** dans une session normale ne doit PAS être
+# signalé : score max < 0.05 (la signature exige la structure salve→salve) ;
+# (c) session normale sans particularité → score final < 0.1 ;
+# (d) sur TOUT le jeu de test : score final minimal des attaques > 0.9 et
+# maximal des normales < 0.1 (séparabilité nette du score par pas).
 
 # %%
-# ---- Exercice P7 : score par pas — montée détectée et bornes contrôlées ----
-prefix_fails = [t for t in exfil_session if t == "LOGIN_OK"] + ["LOGIN_FAIL"] * 4
-s_prefix = per_step_scores(prefix_fails, params6)
-print(f"score final exfil = {s_exfil[-1]:.4f} ; score après salve de FAIL seuls = {s_prefix[-1]:.4f} ; "
-      f"score final normal = {s_normal[-1]:.4f}")
-assert s_exfil[-1] > 0.8, "l'exfiltration est signalée en fin de session"
-assert s_prefix[-1] < 0.5, "la salve de LOGIN_FAIL seule ne suffit pas à signaler"
+# ---- Exercice P7 : score par pas — séparabilité exfil/normale, DATA_OUT isolé neutre ----
+s_prefix = per_step_scores(["SUDO", "LOGIN_OK", "DATA_OUT", "PING",
+                            "DNS_QUERY", "CRON", "RDP", "PING"], params6)
+finals_exfil = np.array([per_step_scores(s, params6)[-1] for s, k in zip(test_s, yte) if k == 1])
+finals_normal = np.array([per_step_scores(s, params6)[-1] for s, k in zip(test_s, yte) if k == 0])
+print(f"score final exfil = {s_exfil[-1]:.4f} ; score max (DATA_OUT isolé) = {s_prefix.max():.4f} ; "
+      f"score final normal = {s_normal[-1]:.6f}")
+print(f"jeu de test : min score attaques = {finals_exfil.min():.4f} ; max score normales = {finals_normal.max():.6f}")
+assert s_exfil[-1] > 0.9, "l'exfiltration est signalée en fin de session"
+assert s_prefix.max() < 0.05, "un DATA_OUT isolé ne suffit pas à signaler"
 assert s_normal[-1] < 0.1, "session normale : reste sous 0.1"
-assert s_exfil[-1] > s_prefix[-1] + 0.2, "les DATA_OUT font grimper le score"
+assert finals_exfil.min() > 0.9 and finals_normal.max() < 0.1, "séparabilité nette sur tout le test"
 print("Exercice P7 vérifié ✔")
 
 print("NB 05 — tous les exercices sont vérifiés. ✅")

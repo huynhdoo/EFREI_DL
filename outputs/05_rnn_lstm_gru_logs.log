@@ -1,0 +1,56 @@
+numpy 2.5.4
+h_t ∈ R^8, séquence T=12
+h_0 = [ 0.685  0.777  0.564 -0.399  0.916 -0.223  0.958  0.72 ]
+h_11 = [0.122 0.973 0.997 0.938 0.999 0.879 0.949 0.995]
+logits (sortie au dernier pas) = [-0.764  0.016]
+gradient check BPTT : max erreur relative = 1.01e-06  (tolérance 1e-5)
+BPTT validé ✔
+h_1 manuel = [ 0.354 -0.603  0.688] == h_1 code = [ 0.354 -0.603  0.688]
+Exercice P1 vérifié ✔ (max rel grad error = 1.6e-09)
+ρ(W_hh) = 0.600 (gain visé 0.6)
+‖∂h_T/∂h_0‖ à T=1 : 0.600   à T=10 : 0.000   à T=40 : 1.719e-16
+pente du log-norm = -0.920 /pas   R² de linéarité = 0.9980
+‖Π J‖ mesuré = 3.777893e-03 ; g^T attendu = 3.777893e-03
+Exercice P2 vérifié ✔
+portes i_t = [0.447 0.539 0.801 0.378]
+portes f_t = [0.787 0.884 0.794 0.624]  (b_f=+1 => sigmoïde > 0.5 : on garde c)
+candidat g_t = [ 0.682 -0.599  0.877 -0.128]
+c_t = [ 0.698 -0.765  0.861  0.451]
+h_t = [ 0.258 -0.182  0.132  0.253]
+après T=50 pas avec f=0.9 : c = [ 0.005 -0.005  0.003]
+prédiction linéaire f^T·c_0    : [ 0.005 -0.005  0.003]
+la cellule suit une dynamique LINÉAIRE (ligne droite) — pas de chaîne tanh' ✔
+c_t manuel = [ 0.612 -0.182  0.105] == c_t lstm_step = [ 0.612 -0.182  0.105]
+Exercice P3 vérifié ✔  (c_30 = 0.95³⁰·c_0 = [ 0.429 -0.215])
+z_t = [0.892 0.27  0.747 0.128 0.244]  (mise à jour)
+r_t = [0.5   0.101 0.667 0.9   0.545]  (réinitialisation)
+h_t = [ 0.459  0.292 -0.193  0.055 -0.002]
+paramètres poids : LSTM = 160, GRU = 120 (ratio = 0.750)
+h_t manuel = [0.542 0.026 0.272] == h_t gru_step = [0.542 0.026 0.272]
+Exercice P4 vérifié ✔ (z=0 : mémoire exacte)
+vocabulaire (train only) : 12 tokens — {'<PAD>': 0, '<UNK>': 1, np.str_('DATA_OUT'): 2, np.str_('SUDO'): 3, np.str_('CRON'): 4, np.str_('RDP'): 5, np.str_('LOGIN_OK'): 6, np.str_('PING'): 7, np.str_('SSH_KEY'): 8, np.str_('LOGIN_FAIL'): 9, np.str_('DNS_QUERY'): 10, np.str_('USB_NEW'): 11}
+matrice d'indices : (200, 12), valeurs ∈ [0, 11]
+masque d'une session raccourcie : [1 1 1 1 1 1 1 0 0 0 0 0]
+NOUVEAU_TOKEN (vu seulement au test) -> id 1 = <UNK>
+session 1 (3 évts, pad à 6) : [2, 3, 4, 0, 0, 0] masque [1, 1, 1, 0, 0, 0]
+session 2 (MYSTERY inconnu) : [5, 1, 6, 4, 7, 0] masque [1, 1, 1, 1, 1, 0]
+Exercice P5 vérifié ✔
+train (400, 12, 12) (V=12) — test (200, 12, 12), équilibré 200/200 et 100/100
+session exfil exemple : ['LOGIN_OK', 'LOGIN_FAIL', 'LOGIN_FAIL', 'LOGIN_FAIL', 'LOGIN_FAIL', 'DATA_OUT', 'DATA_OUT', 'DATA_OUT', 'DATA_OUT', 'PING', 'LOGIN_OK', 'LOGIN_OK']
+  epoch  40 — loss batch ≈ 0.5199
+  epoch  80 — loss batch ≈ 0.0239
+  epoch 120 — loss batch ≈ 0.0231
+exactitude train = 1.000 — exactitude TEST = 1.000 — AUC test = 1.0000
+matrice de confusion (test) : vrais positifs = 100/100, faux positifs = 0/100
+baseline dernier token : exactitude = 0.790
+RNN (déjà entraîné)    : exactitude = 1.000
+Exercice P6 vérifié ✔
+session exfil  : ['LOGIN_OK', 'LOGIN_FAIL', 'LOGIN_FAIL', 'LOGIN_FAIL', 'DATA_OUT', 'DATA_OUT', 'DATA_OUT', 'DNS_QUERY', 'LOGIN_OK', 'DNS_QUERY']
+score par pas  : [0.94 1.   1.   1.   1.   1.   1.   1.   1.   1.   1.   1.  ]
+session normale: ['SUDO', 'LOGIN_OK', 'LOGIN_OK', 'RDP', 'USB_NEW', 'CRON', 'DNS_QUERY', 'SUDO']
+score par pas  : [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+score final exfil = 0.9999 ; score max (DATA_OUT isolé) = 0.0002 ; score final normal = 0.000058
+jeu de test : min score attaques = 0.9999 ; max score normales = 0.000060
+Exercice P7 vérifié ✔
+NB 05 — tous les exercices sont vérifiés. ✅
+05_rnn_lstm_gru_logs — exercices vérifiés. ✅

@@ -1,0 +1,88 @@
+numpy 2.5.4 - pret pour les 15 drills.
+Drill 1 : a1 = [0.7311 0.8808] (sigmo(1), sigmo(2)), yhat = 1.611856, L = 0.187184
+  dL/dw2   = [0.4473 0.5389]
+  delta_1  = [0.1203 0.0642]
+  dL/dW1   =
+[[0.1203 0.2406]
+ [0.0642 0.1285]]
+  ecart max vs gradient numerique : 4.8e-11
+  ✅ gradients analytiques = gradients numeriques (controle independant)
+Drill 2 : sigmo(-1.2) = 1/(1+e^1.2) = 0.231475
+  sigmo'(-1.2) = s(1-s) = 0.177894
+  maximum de sigmo' : en z=0, sigmo'(0) = 0.25
+  ✅ sigmo(-1.2) = 0.231475, sigmo'(-1.2) = 0.177894 (max theorique 0.25 en 0)
+Drill 3 : Xavier var = 2/128 = 0.015625, std = 0.1250, borne unif = +/-0.216506
+  He (ReLU) : std = sqrt(2/64) = 0.176777 (= sqrt(2) * Xavier ici car fan_in=fan_out)
+  verif numerique : var empirique = 0.015728 (visee 0.015625)
+  ✅ Xavier std = 0.125 ; He std = 0.1768 ; variance empirique conforme
+Drill 4 : sortie = (28-5)//1+1 = 24 x 24 x 16
+  parametres conv = 5*5*3*16 + 16 = 1216
+  parametres fully-connected = 2352*16 + 16 = 37648
+  ratio = 31.0x plus de parametres pour le fully-connected
+  ✅ 24x24x16 en sortie ; 1 216 parametres vs 37 648 en fully-connected
+Drill 5 : entree =
+[[ 1  2  3  4]
+ [ 5  6  7  8]
+ [ 9 10 11 12]
+ [13 14 15 16]]
+  sortie (max-pool 2x2, stride 2) =
+[[ 6  8]
+ [14 16]]
+  ✅ sortie = [[6,8],[14,16]] : invariance translationnelle locale, x4 downsampling
+Drill 6 : h1 = 0.099668, h2 = 0.244763, h3 = 0.398935
+  dh1/dw = 0.000000, dh2/dw = 0.093697, dh3/dw = 0.245202
+  dL/dw = (h3-1) * dh3/dw = -0.147382
+  controle numerique : dL/dw = -0.147382
+  facteurs (1-h_t^2) = [np.float64(0.9900662908474398), np.float64(0.9400912642225256), np.float64(0.8408511405019314)] (tous < 1 -> amortissement multiplicatif)
+  ✅ dL/dw = -0.147382 (BPTT) = gradient numerique
+Drill 7 : z_f = 2*0.5 - 2*(-0.5) + 1 - 1 = 2.0
+  f = sigmo(2) = 0.880797  -> on conserve ~88 % de la memoire precedente
+  i = sigmo(0) = 0.5000, c_tilde = tanh(1) = 0.761594
+  c_t = 0.880797*4 + 0.5000*0.761594 = 3.903985
+  h_t = sigmo(1)*tanh(c_t) = 0.731059 * 0.999187 = 0.730464
+  f -> 0 : tout oublier ; f -> 1 : tout conserver ; f = 0.5 : moitie-moitie
+  ✅ f = 0.881 : l'etat de cellule survit presque intact (c_t ~ 3.90)
+Drill 8 : valeurs propres de Sigma = [0.002  0.0022 4.0092]
+  erreur AE = 0.004178 ; tr(Sigma) - lambda_max = 0.004178
+  controle sklearn PCA : erreur = 0.004178 ; |<w_ae, pc1>| = 1.000000
+  ✅ AE lineaire (1 goulot, decodage symetrique) == PCA : erreur = tr(Sigma) - lambda_max
+Drill 9 : seuil = quantile95(benins) = 2.814705
+  valeur theorique mu + 1.6449*sigma = 2.8224
+  FPR empirique (1000 flux indep.) = 0.048 ; theorique = 0.0516
+  TPR sur attaques = 0.986
+  ✅ seuil 2.815 -> ~5 % de fausses alertes, ~98.6 % de vraies attaques detectees
+  => en SOC : 5 fausses alertes pour 1000 flux = cout humain ; voir T09 · P6
+Drill 10 : V(s3) = 1 ; V(s2) = gamma*V(s3) = 0.9 ; V(s1) = gamma^2 = 0.81
+  iteration sur les valeurs : V = [0.81 0.9  1.  ]
+  ✅ V = (gamma^2, gamma, 1) = (0.81, 0.90, 1.00) — la valeur decroît avec la distance au but
+Drill 11 : cible = r + gamma*max Q(s',a') = 3 + 0.9*2 = 4.8
+  erreur TD = 3.8 ; Q <- 1 + 0.5*3.8 = 2.9
+  SARSA (a' = 1ere action, Q=0.5) : TD = 2.45, Q <- 2.225
+  ✅ Q-Learning : Q=2.9 ; SARSA : Q=2.225 — Q-Learning est optimiste (max), SARSA prudent
+Drill 12 : E[r] = (1-eps)*1 + eps*(1+0.5)/2 = 0.8 + 0.2*0.75 = 0.9500
+  toujours-greedy : 1.0 (mais bloque si mauvaise estimation) ; toujours-aleatoire : 0.75
+  simulation MC (N=200,000) : E[r] = 0.94998
+  ✅ E[r] = 0.95 : on sacrifie 5 % de récompense contre la garantie d'explorer
+  => sans exploration residuelle, un bras sous-estime n'est jamais reteste (regret lineaire)
+Drill 13 : t = 155, ln t = 5.043425
+  bras 1 : 0.9 + 2*sqrt(5.0434/100) = 1.349151
+  bras 2 : 0.5 + 2*sqrt(5.0434/5) = 2.508666
+  bras 3 : 0.8 + 2*sqrt(5.0434/50) = 1.435196
+  -> UCB choisit le bras 2 (moyenne la plus FAIBLE mais tres peu essayee)
+  ✅ bras 2 (moyenne 0.5, n=5) l'emporte : incertitude = bonus d'exploration
+  => regret subi = prix a payer pour confirmer/refuter les moyennes observees
+Drill 14 : beta=0.5 -> isoler = 0.7500, limiter = 0.758333  (limiter gagne)
+  beta=0.3 -> isoler = 0.8500, limiter = 0.7750  (isoler gagne)
+  valeur de bascule beta* = 0.2/(5/12) = 0.4800 ; R(isoler)=R(limiter)=0.7600
+  ✅ beta* = 0.48 : au-dela, l'agent privilegie la continuite de service ; en dessous, la securite
+  => recompense mal specifiee = agent qui laisse passer des attaques (ou coupe des services) ;
+     c'est LE risque n°1 du RL en cyber reel (T08 · P6)
+Drill 15 : sign(w) = [ 1. -1.  1.], delta = eps*sign(w) = [ 0.5 -0.5  0.5]
+  gain de logit : w.delta = 2*0.5 + (-3)*(-0.5) + 1*0.5 = 3.0000
+  borne theorique eps*||w||_1 = 0.5*6 = 3.0000
+  marge initiale +2.0 : apres attaque marge = -1.0 -> DECISION INVERSEE
+  epsilon critique : eps* = marge/||w||_1 = 2/6 = 0.333333
+  ✅ chaque dimension bouge de +/-eps dans le sens du gradient : ||w||_1 = sensibilité L∞
+  => defenses : clipping, reentrainement adversarial, distance au seuil (T09 · P4-P5)
+NB 10 — les 15 drills sont vérifiés. ✅
+10_preparation_projet — exercices vérifiés. ✅

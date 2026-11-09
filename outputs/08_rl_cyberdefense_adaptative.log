@@ -1,0 +1,45 @@
+etat Lateral         action Surveiller    -> etat Lateral         recompense -7.0 (= -1 - 2x3)
+etat Lateral         action Isoler        -> etat Lateral         recompense -9.0 (= -3 - 2x3)
+etat Lateral         action Bloquer       -> etat Securise        recompense -5.0 (= -5 - 2x0)
+etat Lateral         action Reinitialiser -> etat Securise        recompense -8.0 (= -8 - 2x0)
+Aucun etat terminal : episodes a horizon borne (contrainte operationnelle).
+Exercice P1 verifie : r = -cout - 2*s' (main), reset 95 % (MC 0.950).
+Retour moyen (20 pas, 400 episodes, graine fixe) :
+  toujours surveiller :   -164.5
+  regle SOC (isol@>=2):    -64.2
+  agent Q-Learning    :    -52.2   <- appris sans etiquettes
+Politique gloutonne de V* :  ['Surveiller', 'Isoler', 'Isoler', 'Isoler', 'Bloquer']
+Politique apprise Q        : ['Surveiller', 'Isoler', 'Isoler', 'Isoler', 'Bloquer']
+Exercice P2 verifie : Q maj main -5.88, agent -52.2 > regle -64.2 > surveiller -164.5.
+alpha=0.0  securite(-stage final)=-4.00  disponibilite=1.000  part bloquer=0.000
+alpha=0.2  securite(-stage final)=-0.37  disponibilite=0.630  part bloquer=0.000
+alpha=0.5  securite(-stage final)=-0.82  disponibilite=0.748  part bloquer=0.011
+alpha=0.8  securite(-stage final)=-0.36  disponibilite=0.608  part bloquer=0.024
+alpha=1.0  securite(-stage final)=-0.36  disponibilite=0.605  part bloquer=0.024
+Exercice P3 verifie : arbitrage securite -4.00->-0.36 / dispo 1.00->0.60 (Pas de domination totale : compromis).
+E[r | s=3, P-contenement] calcule a la main = -12.18
+E[r | s=3, P-contenement] Monte-Carlo (3000 tirages) = -12.20
+Retour 'naif' (surveiller, reset en exfiltration)        : -101.2
+Retour ORCHESTRE (P-rapide s=2, P-contenement s>=3)      : -83.4
+Retour sur-orchestre (P-contenement partout)             : -240.1
+Retour regle SOC simple (isol@>=2)                       : -64.2
+Exercice P4 verifie : MC -12.20 == main -12.18, orchestre -83.4 > naif -101.2 >> sur-orchestre -240.1.
+Evalue sur 8 graines d'entree (entrainement + evaluation) :
+  Q-Learning : moyenne -53.7  ecart-type inter-graines 3.68
+  regle SOC  : moyenne -64.2  ecart-type 0.60
+  distribution des retours Q (graine 1) : p5 -68 | mediane -52 | p95 -38
+Exercice P5 verifie : Q -53.7 > regle -64.2 > random -93.0, sd graines 3.68.
+Reward hacking : part bloquer = 1.000, disponibilite = 0.000,
+  utilite REELLE -100.6 vs agent bien reward -52.2 -> score flatte, reel desastre.
+Attaquant adaptatif : p_escalade passe a 0.47 -> retour -52.2 -> -55.7
+Exercice P6 verifie : hacking bloque 100% (dispo 0%), retour adversarial -55.7 < -52.2.
+Tableau final — utilite reelle (horizon 20, graine fixe) :
+  Q-Learning (vraie recompense)           -52.2
+  Regle SOC (monitor puis isoler)         -64.2
+  Playbooks orchestres (par etage)        -83.4
+  Q-Learning hacke (mauvaise recompense)   -100.6
+  Surveillance naive puis reset          -101.2
+  Toujours surveiller                    -164.5
+Exercice P7 verifie : Q -52.2 > regle -64.2 > orchestre -83.4 > naif -101.2 > surveiller -164.5 (hacke -100.6).
+08_rl_cyberdefense_adaptative — exercices vérifiés. ✅
+NB 08 — tous les exercices sont vérifiés. ✅
