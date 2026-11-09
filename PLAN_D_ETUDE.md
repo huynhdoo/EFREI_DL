@@ -52,7 +52,8 @@ Rythme interne type (à adapter selon le topic) :
 - **03:00–03:30** (30 min) — drill papier (type soutenance) + auto-évaluation
 
 > Matériel par séquence : 1 notebook (`notebooks/`) + 1 script (`code/`) du même
-> numéro, exécutés ensemble.
+> numéro, exécutés ensemble. Support de séance (déroulé + programme indicatif) :
+> `slides/EFREI - DL.pptx`.
 
 ### S1 · T01 — Perceptron, descente de gradient, backpropagation (Partie 1)
 **Objectifs :** refaire à la main une propagation avant/arrière ; entraîner un MLP numpy.

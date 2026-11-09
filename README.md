@@ -38,8 +38,11 @@ Voir le détail dans [`PLAN_NOTEBOOKS.md`](PLAN_NOTEBOOKS.md).
 > leurs chapitres (`*(réf. ...)*`). Référentiels cyber cités : MITRE ATLAS,
 > OWASP ML Security Top 10.*
 
-## Fiches & cas d'étude (`courses/`, `exams/`)
+## Fiches, cas d'étude & supports (`courses/`, `exams/`, `slides/`)
 
+- `slides/EFREI - DL.pptx` — support de séance : déroulé des 10 séances,
+  programme indicatif par topic (T01–T09 + préparation) et rubrique du projet
+  évalué (miroir de `EFREI/MATHS/slides/EFREI - MATHS.pptx`).
 - `courses/T0N_synthese_*.docx` — fiches de synthèse P1–P6 de chaque topic
   (à quoi ça sert / calcul manuel / code Python).
 - `courses/T0N_projet_*.docx` — cas d'étude cyber complet, calculs détaillés étape par étape.
